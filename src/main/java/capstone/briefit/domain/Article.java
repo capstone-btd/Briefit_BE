@@ -33,4 +33,8 @@ public class Article extends BaseEntity{
     @OneToMany(mappedBy = "article")
     @Getter
     private List<ArticleSource> articleSources = new ArrayList<>();
+
+    @OneToMany(mappedBy = "article")
+    @Getter
+    private List<UserCustom> userCustoms = new ArrayList<>();
 }

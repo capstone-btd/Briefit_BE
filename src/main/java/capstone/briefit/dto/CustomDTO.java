@@ -6,7 +6,7 @@ import java.util.List;
 
 public class CustomDTO {
     @Builder
-    public record HighlightsInfoDTO(
+    public record CustomInfoDTO(
             int startPoint,
             int endPoint,
             String highlightsColor,
@@ -16,8 +16,8 @@ public class CustomDTO {
     ){}
 
     @Builder
-    public record CustomizeRequestInfoDTO(
+    public record CustomizeRequestDTO(
             String backgroundColor,
-            List<HighlightsInfoDTO> highlightsInfos
+            List<CustomInfoDTO> customInfos
     ){}
 }

@@ -9,4 +9,5 @@ import java.util.List;
 
 public interface ScrapRepository extends JpaRepository<UserScrap, Long> {
     List<UserScrap> findAllByUser(User user);
+    void deleteAllByUser(User user);
 }

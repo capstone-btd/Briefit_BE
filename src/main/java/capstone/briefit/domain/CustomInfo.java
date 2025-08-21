@@ -6,9 +6,9 @@ import lombok.*;
 @Entity
 @Getter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
-public class ScrapCustom extends BaseEntity{
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class CustomInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -19,10 +19,10 @@ public class ScrapCustom extends BaseEntity{
     @Column(columnDefinition = "TEXT", nullable = false)
     private int endPoint;
 
-    @Column(columnDefinition = "VARCHAR(15) DEFAULT '노'", nullable = false)
+    @Column(columnDefinition = "VARCHAR(30) DEFAULT '노'", nullable = false)
     private String highlightsColor;
 
-    @Column(columnDefinition = "VARCHAR(15) DEFAULT '검'", nullable = false)
+    @Column(columnDefinition = "VARCHAR(30) DEFAULT '검'", nullable = false)
     private String fontColor;
 
     @Column(columnDefinition = "INT DEFAULT 10", nullable = false)
@@ -32,6 +32,6 @@ public class ScrapCustom extends BaseEntity{
     private Boolean isBold;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "scrap_id")
-    private UserScrap userScrap;
+    @JoinColumn(name = "custom_id")
+    private UserCustom userCustom;
 }

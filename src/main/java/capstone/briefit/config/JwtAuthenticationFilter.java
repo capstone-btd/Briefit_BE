@@ -26,7 +26,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String uri = request.getRequestURI();
 
         // 인증 예외 경로
-        if (uri.equals("/articles") || uri.equals("/articles/search")) {
+        if (uri.equals("/articles") || uri.equals("/articles/search") || uri.equals("/article")) {
             // JWT 토큰 검사 없이 그냥 통과
             filterChain.doFilter(request, response);
             return;

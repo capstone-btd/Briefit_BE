@@ -5,8 +5,10 @@ import capstone.briefit.domain.*;
 import capstone.briefit.domain.enums.Category;
 import capstone.briefit.domain.enums.Company;
 import capstone.briefit.dto.ArticleResponseDTO;
+import capstone.briefit.dto.CustomDTO;
 import capstone.briefit.dto.SourceDTO;
 import capstone.briefit.repository.ArticleRepository;
+import capstone.briefit.repository.CustomInfoRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,11 +20,13 @@ import java.util.List;
 @Transactional
 public class ArticleService {
     private static ArticleRepository articleRepository;
+    private static CustomInfoRepository customInfoRepository;
     private static JwtProvider jwtProvider;
 
     @Autowired
-    public ArticleService(ArticleRepository articleRepository, JwtProvider jwtProvider) {
+    public ArticleService(ArticleRepository articleRepository, CustomInfoRepository customInfoRepository, JwtProvider jwtProvider) {
         this.articleRepository = articleRepository;
+        this.customInfoRepository = customInfoRepository;
         this.jwtProvider = jwtProvider;
     }
 
@@ -58,14 +62,18 @@ public class ArticleService {
             }
 
             Long scrapId = null;
-            boolean isCustomize = false;
+            Long customId = null;
+            String backgroundColor = null;
             if(user != null) {
-                for (UserScrap userScrap : user.getUserScraps()) {
-                    if (userScrap.getArticle().getId().equals(article.getId())) {
+                for (UserScrap userScrap : user.getUserScraps()){
+                    if(article.getId().equals(userScrap.getArticle().getId())){
                         scrapId = userScrap.getId();
-                        if (!userScrap.getBackgroundColor().equals("white-theme") || !userScrap.getScrapCustoms().isEmpty()) {
-                            isCustomize = true;
-                        }
+                    }
+                }
+                for (UserCustom userCustom : user.getUserCustoms()){
+                    if(article.getId().equals(userCustom.getArticle().getId())){
+                        customId = userCustom.getId();
+                        backgroundColor = userCustom.getBackgroundColor();
                     }
                 }
             }
@@ -74,12 +82,13 @@ public class ArticleService {
                     .builder()
                     .articleId(article.getId())
                     .scrapId(scrapId)
-                    .isCustomize(isCustomize)
+                    .customId(customId)
                     .title(article.getTitle())
                     .body(article.getBody())
                     .categories(categories)
                     .pressCompanies(companies)
                     .imgUrls(imgUrls)
+                    .backgroundColor(backgroundColor)
                     .createdAt(article.getCreatedAt())
                     .build());
         }
@@ -120,12 +129,18 @@ public class ArticleService {
             }
 
             Long scrapId = null;
-            boolean isCustomize = false;
-            for (UserScrap userScrap : user.getUserScraps()) {
-                if (userScrap.getArticle().getId().equals(article.getId())) {
-                    scrapId = userScrap.getId();
-                    if (!userScrap.getBackgroundColor().equals("white-theme") || !userScrap.getScrapCustoms().isEmpty()) {
-                        isCustomize = true;
+            Long customId = null;
+            String backgroundColor = null;
+            if(user != null) {
+                for (UserScrap userScrap : user.getUserScraps()){
+                    if(article.getId().equals(userScrap.getArticle().getId())){
+                        scrapId = userScrap.getId();
+                    }
+                }
+                for (UserCustom userCustom : user.getUserCustoms()){
+                    if(article.getId().equals(userCustom.getArticle().getId())){
+                        customId = userCustom.getId();
+                        backgroundColor = userCustom.getBackgroundColor();
                     }
                 }
             }
@@ -134,12 +149,13 @@ public class ArticleService {
                     .builder()
                     .articleId(article.getId())
                     .scrapId(scrapId)
-                    .isCustomize(isCustomize)
+                    .customId(customId)
                     .title(article.getTitle())
                     .body(article.getBody())
                     .categories(categories)
                     .pressCompanies(companies)
                     .imgUrls(imgUrls)
+                    .backgroundColor(backgroundColor)
                     .createdAt(article.getCreatedAt())
                     .build());
         }
@@ -147,8 +163,43 @@ public class ArticleService {
         return articleInfos;
     }
 
-    public ArticleResponseDTO.ArticleDetailInfoDTO getArticle(Long id){
+    public ArticleResponseDTO.ArticleDetailInfoDTO getArticle(String token, Long id){
+        User user = null;
+        if(token != null) {
+            user = jwtProvider.getUserByToken(token);
+        }
+
         Article article = articleRepository.findById(id).get();
+        Long scrapId = null;
+        Long customId = null;
+        String backgroundColor = null;
+        List<CustomDTO.CustomInfoDTO> customs = new ArrayList<>();
+        if(user != null) {
+            for (UserScrap userScrap : user.getUserScraps()){
+                if(article.getId().equals(userScrap.getArticle().getId())){
+                    scrapId = userScrap.getId();
+                }
+            }
+
+            for (UserCustom userCustom : user.getUserCustoms()){
+                if(article.getId().equals(userCustom.getArticle().getId())){
+                    customId = userCustom.getId();
+                    backgroundColor = userCustom.getBackgroundColor();
+                    for(CustomInfo customInfo : customInfoRepository.findAllByUserCustom(userCustom)){
+                        customs.add(CustomDTO.CustomInfoDTO
+                                .builder()
+                                .startPoint(customInfo.getStartPoint())
+                                .endPoint(customInfo.getEndPoint())
+                                .highlightsColor(customInfo.getHighlightsColor())
+                                .highlightsFontColor(customInfo.getFontColor())
+                                .highlightsFontSize(customInfo.getFontSize())
+                                .isBold(customInfo.getIsBold())
+                                .build()
+                        );
+                    }
+                }
+            }
+        }
 
         List<SourceDTO.SourceInfoDTO> sources = new ArrayList<>();
         for(ArticleSource source : article.getArticleSources()) {
@@ -172,11 +223,18 @@ public class ArticleService {
 
         return ArticleResponseDTO.ArticleDetailInfoDTO
                 .builder()
+                .articleId(article.getId())
+                .scrapId(scrapId)
+                .customId(customId)
                 .title(article.getTitle())
                 .body(article.getBody())
                 .categories(categories)
                 .sources(sources)
                 .imgUrls(imgUrls)
+                .backgroundColor(backgroundColor)
+//                .fontSize(null)
+//                .fontColor(null)
+                .customs(customs)
                 .createdAt(article.getCreatedAt())
                 .build();
     }
@@ -207,14 +265,18 @@ public class ArticleService {
             }
 
             Long scrapId = null;
-            boolean isCustomize = false;
+            Long customId = null;
+            String backgroundColor = null;
             if(user != null) {
-                for (UserScrap userScrap : user.getUserScraps()) {
-                    if (userScrap.getArticle().getId().equals(article.getId())) {
+                for (UserScrap userScrap : user.getUserScraps()){
+                    if(article.getId().equals(userScrap.getArticle().getId())){
                         scrapId = userScrap.getId();
-                        if (!userScrap.getBackgroundColor().equals("white-theme") || !userScrap.getScrapCustoms().isEmpty()) {
-                            isCustomize = true;
-                        }
+                    }
+                }
+                for (UserCustom userCustom : user.getUserCustoms()){
+                    if(article.getId().equals(userCustom.getArticle().getId())){
+                        customId = userCustom.getId();
+                        backgroundColor = userCustom.getBackgroundColor();
                     }
                 }
             }
@@ -223,12 +285,13 @@ public class ArticleService {
                     .builder()
                     .articleId(article.getId())
                     .scrapId(scrapId)
-                    .isCustomize(isCustomize)
+                    .customId(customId)
                     .title(article.getTitle())
                     .body(article.getBody())
                     .categories(categories)
                     .pressCompanies(companies)
                     .imgUrls(imgUrls)
+                    .backgroundColor(backgroundColor)
                     .createdAt(article.getCreatedAt())
                     .build());
         }

@@ -41,11 +41,12 @@ public class User extends BaseEntity{
     private LocalDateTime inactiveDate;
 
     @OneToMany(mappedBy = "user")
-    @Getter
     @Setter
     private List<UserTag> userTags = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
-    @Getter
     private List<UserScrap> userScraps = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user")
+    private List<UserCustom> userCustoms = new ArrayList<>();
 }
