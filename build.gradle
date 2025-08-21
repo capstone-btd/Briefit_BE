@@ -38,6 +38,7 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5' // jackson 사용 시
+	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.17.1' // xml 포맷 사용 시
 
 	// S3
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'

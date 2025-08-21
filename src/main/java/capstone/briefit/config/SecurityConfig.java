@@ -18,10 +18,10 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
     private final JwtProvider jwtProvider;
     private final CustomOAuth2UserService customOAuth2UserService;
-    private final capstone.briefit.security.OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
     @Autowired
-    public SecurityConfig(JwtProvider jwtProvider, CustomOAuth2UserService customOAuth2UserService, capstone.briefit.security.OAuth2SuccessHandler oAuth2SuccessHandler) {
+    public SecurityConfig(JwtProvider jwtProvider, CustomOAuth2UserService customOAuth2UserService, OAuth2SuccessHandler oAuth2SuccessHandler) {
         this.jwtProvider = jwtProvider;
         this.customOAuth2UserService = customOAuth2UserService;
         this.oAuth2SuccessHandler = oAuth2SuccessHandler;
@@ -38,7 +38,7 @@ public class SecurityConfig {
 //                        session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 )
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("oauth2/authorization/**", "login/**", "users/login/naver/**", "article", "articles", "articles/search", "wordcloud").permitAll() // 소셜 로그인 API는 인증 없이 접근 허용
+                        .requestMatchers("oauth2/authorization/**", "login/**", "users/login/naver/**", "article", "articles", "articles/search", "word", "word/wordcloud").permitAll() // 소셜 로그인 API는 인증 없이 접근 허용
                         .anyRequest().authenticated() // 나머지 API는 인증 필요
                 )
                 .oauth2Login(oauth2 ->
@@ -55,6 +55,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.addAllowedOrigin("http://localhost:3000");
+        configuration.addAllowedOrigin("https://briefit-fe.vercel.app");
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
         configuration.setAllowCredentials(true);

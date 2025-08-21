@@ -12,22 +12,30 @@ public class ArticleResponseDTO {
     public record ArticleInfoDTO(
             Long articleId,
             Long scrapId,
-            Boolean isCustomize,
+            Long customId,
             String title,
             String body,
             List<Category> categories,
             List<Company> pressCompanies,
             List<String> imgUrls,
+            String backgroundColor,
             LocalDateTime createdAt
     ){}
 
     @Builder
     public record ArticleDetailInfoDTO(
+            Long articleId,
+            Long scrapId,
+            Long customId,
             String title,
             String body,
             List<Category> categories,
             List<SourceDTO.SourceInfoDTO> sources,
             List<String> imgUrls,
-            LocalDateTime createdAt
+            String backgroundColor,
+//            Integer fontSize,
+//            String fontColor,
+            LocalDateTime createdAt,
+            List<CustomDTO.CustomInfoDTO> customs
     ){}
 }

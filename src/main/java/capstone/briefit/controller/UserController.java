@@ -36,19 +36,12 @@ public class UserController {
 //        return ResponseEntity.ok(jwtToken);
 //    }
 
-//    //프론트랑 연동하기 전에 jwt 토큰 얻어오기 용으로 잠시 사용할 API
+//    //테스트할 때 jwt 토큰을 얻어오는 용으로 잠시 사용할 API
 //    @GetMapping("/login/naver/success")
-//    public ResponseEntity<Map<String, String>> loginSuccess(@RequestParam("jwt-token") String token) {
-//        UserResponseDTO.UserInfo user = userService.getUserInfo("Bearer " + token);
-//
+//    public ResponseEntity<Map<String, String>> loginSuccess(@RequestParam String accessToken, @RequestParam String registration) {
 //        Map<String, String> map = new HashMap<>();
-//        map.put("jwt-token", token);
-//
-//        if(user.nickname() == null){
-//            map.put("state", "new");
-//        }else{
-//            map.put("state", "old");
-//        }
+//        map.put("accessToken", accessToken);
+//        map.put("registration", registration);
 //
 //        // 토큰 검증 및 필요한 작업 수행
 //        return ResponseEntity.ok(map);
@@ -64,4 +57,8 @@ public class UserController {
         return userService.getUserInfo(token);
     }
 
+    @DeleteMapping("")
+    public Boolean deleteUser(@RequestHeader(value = "Authorization") String token){
+        return userService.deleteUser(token);
+    }
 }

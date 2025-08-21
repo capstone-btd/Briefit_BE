@@ -27,8 +27,8 @@ public class ArticleController {
     }
 
     @GetMapping("/article")
-    public ArticleResponseDTO.ArticleDetailInfoDTO getArticle(@RequestParam("article-id") Long id) {
-        return articleService.getArticle(id);
+    public ArticleResponseDTO.ArticleDetailInfoDTO getArticle(@RequestHeader(value = "Authorization", required = false) String token, @RequestParam("article-id") Long id) {
+        return articleService.getArticle(token, id);
     }
 
     @GetMapping("/articles/search")

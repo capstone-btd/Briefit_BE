@@ -2,15 +2,10 @@ package capstone.briefit.service;
 
 import capstone.briefit.aws.AmazonS3Manager;
 import capstone.briefit.config.JwtProvider;
-import capstone.briefit.domain.User;
-import capstone.briefit.domain.UserTag;
-import capstone.briefit.domain.Uuid;
-import capstone.briefit.domain.Wordcloud;
+import capstone.briefit.domain.*;
 import capstone.briefit.domain.enums.Tag;
 import capstone.briefit.dto.UserResponseDTO;
-import capstone.briefit.repository.UserRepository;
-import capstone.briefit.repository.UserTagRepository;
-import capstone.briefit.repository.UuidRepository;
+import capstone.briefit.repository.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
@@ -23,14 +18,22 @@ import java.util.*;
 @Service
 @Transactional
 public class UserService {
+    private final UserRepository userRepository;
     private final UserTagRepository userTagRepository;
+    private final ScrapRepository scrapRepository;
+    private final CustomRepository customRepository;
+    private final CustomInfoRepository customInfoRepository;
     private final JwtProvider jwtProvider;
     private final AmazonS3Manager amazonS3Manager;
     private final UuidRepository uuidRepository;
 
     @Autowired
-    public UserService(UserTagRepository userTagRepository, JwtProvider jwtProvider, AmazonS3Manager amazonS3Manager, UuidRepository uuidRepository) {
+    public UserService(UserRepository userRepository, UserTagRepository userTagRepository, ScrapRepository scrapRepository, CustomRepository customRepository, CustomInfoRepository customInfoRepository, JwtProvider jwtProvider, AmazonS3Manager amazonS3Manager, UuidRepository uuidRepository) {
+        this.userRepository = userRepository;
         this.userTagRepository = userTagRepository;
+        this.scrapRepository = scrapRepository;
+        this.customRepository = customRepository;
+        this.customInfoRepository = customInfoRepository;
         this.jwtProvider = jwtProvider;
         this.amazonS3Manager = amazonS3Manager;
         this.uuidRepository = uuidRepository;
@@ -84,6 +87,20 @@ public class UserService {
         User updateUser = jwtProvider.getUserByToken(token);
         updateUser.setNickname(user.getNickname());
         updateUser.setUserTags(user.getUserTags());
+        return Boolean.TRUE;
+    }
+
+    public Boolean deleteUser(String token){
+        User user = jwtProvider.getUserByToken(token);
+
+        userTagRepository.deleteAllByUser(user);
+        scrapRepository.deleteAllByUser(user);
+        for(UserCustom userCustom: user.getUserCustoms()) {
+            customInfoRepository.deleteAllByUserCustom(userCustom);
+        }
+        customRepository.deleteAllByUser(user);
+        userRepository.deleteById(user.getId());
+
         return Boolean.TRUE;
     }
 }
