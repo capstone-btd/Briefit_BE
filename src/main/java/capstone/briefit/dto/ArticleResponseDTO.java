@@ -23,6 +23,15 @@ public class ArticleResponseDTO {
     ){}
 
     @Builder
+    public record ArticleInfosDTO(
+            List<ArticleInfoDTO> articleInfos
+//            Long page,
+//            Long limit,
+//            Long totalCount,
+//            Long totalPage
+    ){}
+
+    @Builder
     public record ArticleDetailInfoDTO(
             Long articleId,
             Long scrapId,

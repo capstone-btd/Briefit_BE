@@ -10,4 +10,10 @@ public class SourceDTO {
         Company pressCompany,
         String url
     ){}
+
+    @Builder
+    public record SourceCompanyDTO(
+            String company,
+            Long count
+    ){}
 }

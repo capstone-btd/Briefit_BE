@@ -1,7 +1,9 @@
 package capstone.briefit.controller;
 
+import capstone.briefit.apiPayload.ApiResponse;
 import capstone.briefit.dto.ArticleResponseDTO;
 import capstone.briefit.service.ArticleService;
+import com.nimbusds.oauth2.sdk.ErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,13 +19,32 @@ public class ArticleController {
     }
 
     @GetMapping("/articles")
-    public List<ArticleResponseDTO.ArticleInfoDTO> getArticles(@RequestHeader(value = "Authorization", required = false) String token, @RequestParam String category){
-        return articleService.getArticles(token, category);
+    public Object getArticles(@RequestHeader(value = "Authorization", required = false) String token, @RequestParam String category, @RequestParam String company) {
+//        try {
+//            if (category == null || company == null || page == null) {
+//                return ApiResponse.error("400", "기사 목록 조회에 필요한 정보가 부족합니다.");
+//            } else {
+//                return ApiResponse.success("기사 목록 조회에 성공했습니다.", articleService.getArticles(token, category, company, page));
+//            }
+//        }catch (Exception e){
+//            return ApiResponse.error("500", "기사 목록 조회에 실패했습니다.");
+//        }
+        return articleService.getArticles(token, category, company);
     }
 
+
     @GetMapping("/articles/recommend")
-    public List<ArticleResponseDTO.ArticleInfoDTO> getRecommendedArticles(@RequestHeader(value = "Authorization") String token, @RequestParam String category){
-        return articleService.recommendArticles(token, category);
+    public Object getRecommendedArticles(@RequestHeader(value = "Authorization") String token, @RequestParam String category, @RequestParam String company) {
+//        try {
+//            if (category == null || company == null || page == null) {
+//                return ApiResponse.error("400", "추천 기사 목록 조회에 필요한 정보가 부족합니다.");
+//            } else {
+//                return ApiResponse.success("추천 기사 목록 조회에 성공했습니다.", articleService.recommendArticles(token, category, company, page));
+//            }
+//        }catch (Exception e){
+//                return ApiResponse.error("500", "추천 기사 목록 조회에 실패했습니다.");
+//        }
+        return articleService.recommendArticles(token, category, company);
     }
 
     @GetMapping("/article")
@@ -32,8 +53,16 @@ public class ArticleController {
     }
 
     @GetMapping("/articles/search")
-    public List<ArticleResponseDTO.ArticleInfoDTO> searchArticles(@RequestHeader(value = "Authorization", required = false) String token, @RequestParam("string") String string) {
-        return articleService.searchArticles(token, string);
+    public Object searchArticles(@RequestHeader(value = "Authorization", required = false) String token, @RequestParam("string") String string, @RequestParam String company) {
+//        try {
+//            if (string == null || company == null || page == null) {
+//                return ApiResponse.error("400", "기사 검색 결과 목록 조회에 필요한 정보가 부족합니다.");
+//            } else {
+//                return ApiResponse.success("기사 검색 결과 목록 조회에 성공했습니다.", articleService.searchArticles(token, string, company, page));
+//            }
+//        }catch (Exception e){
+//            return ApiResponse.error("500", "기사 검색 결과 목록 조회에 실패했습니다.");
+//        }
+        return articleService.searchArticles(token, string, company);
     }
-
 }

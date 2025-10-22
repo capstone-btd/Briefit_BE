@@ -31,6 +31,14 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
+        String state = request.getParameter("state");
+        String clientType = "default";
+
+        if (state != null && state.contains(":")) {
+            String[] parts = state.split(":");
+            clientType = parts[1]; // UUID는 parts[0], 프론트 구분은 parts[1]
+        }
+
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         // 유저 정보에서 JWT 생성 (예: 이메일 기반)
         String jwtToken = (String) oAuth2User.getAttributes().get("jwtToken");
@@ -44,10 +52,18 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 //        cookie.setSecure(true);            // HTTPS 환경에서만 사용(운영 시 활성화)
 
         // 토큰을 URL 쿼리 파라미터로 포함하여 프론트엔드 로그인 성공 페이지로 리다이렉트
-//        String targetUrl = "http://localhost:3000" + "/users/login/naver/success" + "?accessToken=" + jwtToken + "&registration=" + registration;
-        String targetUrl = "https://briefit-fe.vercel.app" + "/users/login/naver/success" + "?accessToken=" + jwtToken + "&registration=" + registration;
+        String targetUrl;
+        if ("local".equals(clientType)) {
+            targetUrl = "http://localhost:3000" + "/users/login/naver/success" + "?accessToken=" + jwtToken + "&registration=" + registration;
+        } else if ("mobile".equals(clientType)) {
+            targetUrl = "https://briefit-mobile.vercel.app" + "/users/login/naver/success" + "?accessToken=" + jwtToken + "&registration=" + registration;
+        } else {
+            targetUrl = "https://briefit-fe.vercel.app" + "/users/login/naver/success" + "?accessToken=" + jwtToken + "&registration=" + registration;
+        }
+
         // 토큰을 쿼리파라미터로 넘기지 않고 바로 프론트엔드로 리다이렉트
-//        String targetUrl = "http://localhost:3000/users/login/naver/success";
+        // String targetUrl = "http://localhost:3000/users/login/naver/success";
+
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 

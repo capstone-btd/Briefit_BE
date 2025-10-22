@@ -9,8 +9,12 @@ import capstone.briefit.dto.CustomDTO;
 import capstone.briefit.dto.SourceDTO;
 import capstone.briefit.repository.ArticleRepository;
 import capstone.briefit.repository.CustomInfoRepository;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -30,7 +34,7 @@ public class ArticleService {
         this.jwtProvider = jwtProvider;
     }
 
-    public List<ArticleResponseDTO.ArticleInfoDTO> getArticles(String token, String category){
+    public List<ArticleResponseDTO.ArticleInfoDTO> getArticles(String token, String category, String company){
         List<ArticleResponseDTO.ArticleInfoDTO> articleInfos = new ArrayList<>();
 
         User user = null;
@@ -38,12 +42,8 @@ public class ArticleService {
             user = jwtProvider.getUserByToken(token);
         }
 
-        List<Article> articles = new ArrayList<>();
-        if(category.equals("전체")){
-            articles = articleRepository.findAll();
-        }else{
-            articles = articleRepository.findByCategory(category);
-        }
+//        Pageable pageable = PageRequest.of(page-1, 9, Sort.by("id").descending());
+        List<Article> articles = articleRepository.findByCategoryAndCompany(category, company);
 
         for(Article article : articles){
             List<Category> categories = new ArrayList<>();
@@ -93,10 +93,20 @@ public class ArticleService {
                     .build());
         }
 
+        Long totalCount = articleRepository.countByCategoryAndCompany(category, company);
+        Long totalPage = (long)Math.ceil(totalCount/9D);
+//        return ArticleResponseDTO.ArticleInfosDTO
+//                .builder()
+//                .articleInfos(articleInfos)
+//                .page(Long.valueOf(page))
+//                .limit(9L)
+//                .totalCount(totalCount)
+//                .totalPage(totalPage)
+//                .build();
         return articleInfos;
     }
 
-    public List<ArticleResponseDTO.ArticleInfoDTO> recommendArticles(String token, String category){
+    public List<ArticleResponseDTO.ArticleInfoDTO> recommendArticles(String token, String category, String company){
         List<Article> articles = new ArrayList<>();
         List<ArticleResponseDTO.ArticleInfoDTO> articleInfos = new ArrayList<>();
 
@@ -106,11 +116,17 @@ public class ArticleService {
             tags.add(tag.getTag().toString());
         }
 
+//        Pageable pageable = PageRequest.of(page-1, 9, Sort.by("id").descending());
+        Long totalCount = null;
         if(category.equals("전체")){
-            articles = articleRepository.findByTags(tags);
+            articles = articleRepository.findByTagsAndCompany(tags, company);
+            totalCount = articleRepository.countByTagsAndCompany(tags, company);
+
         }else{
-            articles = articleRepository.findByTagsAndCategory(tags, category);
+            articles = articleRepository.findByTagsAndCategoryAndCompany(tags, category, company);
+            totalCount = articleRepository.countByTagsAndCategoryAndCompany(tags, category, company);
         }
+        Long totalPage = (long)Math.ceil(totalCount/9D);
 
         for(Article article : articles){
             List<Category> categories = new ArrayList<>();
@@ -160,6 +176,14 @@ public class ArticleService {
                     .build());
         }
 
+//        return ArticleResponseDTO.ArticleInfosDTO
+//                .builder()
+//                .articleInfos(articleInfos)
+//                .page(Long.valueOf(page))
+//                .limit(9L)
+//                .totalCount(totalCount)
+//                .totalPage(totalPage)
+//                .build();
         return articleInfos;
     }
 
@@ -239,7 +263,7 @@ public class ArticleService {
                 .build();
     }
 
-    public List<ArticleResponseDTO.ArticleInfoDTO> searchArticles(String token, String string) {
+    public List<ArticleResponseDTO.ArticleInfoDTO> searchArticles(String token, String string, String company) {
         List<ArticleResponseDTO.ArticleInfoDTO> articleInfos = new ArrayList<>();
 
         User user = null;
@@ -247,7 +271,8 @@ public class ArticleService {
             user = jwtProvider.getUserByToken(token);
         }
 
-        List<Article> articles = articleRepository.findByTitleContainingOrBodyContaining(string, string);
+//        Pageable pageable = PageRequest.of(page-1, 9, Sort.by("id").descending());
+        List<Article> articles = articleRepository.findByKeywordAndCompany(string.replaceAll("\\s+", ""), company);
         for(Article article : articles){
             List<Category> categories = new ArrayList<>();
             for(ArticleCategory articleCategory : article.getArticleCategories()){
@@ -296,6 +321,16 @@ public class ArticleService {
                     .build());
         }
 
+        Long totalCount = articleRepository.countByKeywordAndCompany(string.replaceAll("\\s+", ""), company);
+        Long totalPage = (long)Math.ceil(totalCount/9D);
+//        return ArticleResponseDTO.ArticleInfosDTO
+//                .builder()
+//                .articleInfos(articleInfos)
+//                .page(Long.valueOf(page))
+//                .limit(9L)
+//                .totalCount(totalCount)
+//                .totalPage(totalPage)
+//                .build();
         return articleInfos;
     }
 
